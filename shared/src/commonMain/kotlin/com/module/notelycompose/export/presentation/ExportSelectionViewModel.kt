@@ -48,12 +48,14 @@ class ExportSelectionViewModel(
 
     fun onUpdateExportOptions(
         shouldExportAudio: Boolean,
-        shouldExportTxt: Boolean
+        shouldExportTxt: Boolean,
+        shouldExportMd: Boolean
     ) {
         _state.update { currentState ->
             currentState.copy(
                 shouldExportAudio = shouldExportAudio,
-                shouldExportTxt = shouldExportTxt
+                shouldExportTxt = shouldExportTxt,
+                shouldExportMd = shouldExportMd
             )
         }
         onFilterSelectedNotes()
@@ -82,6 +84,7 @@ class ExportSelectionViewModel(
         val texts = _state.value.selectedNotes.map { it.content }
         val titles =  _state.value.selectedNotes.map { it.title }
         val audioPath =  _state.value.selectedNotes.map { it.recordingPath }
+        val createdDates = _state.value.selectedNotes.map { it.createdAt }
         viewModelScope.launch {
             delay(2.seconds)
             _exportingState.update { ExportingFileState.Exporting() }
@@ -90,8 +93,10 @@ class ExportSelectionViewModel(
             texts = texts,
             titles = titles,
             audioPath = audioPath,
+            createdDates = createdDates,
             shouldExportAudio = _state.value.shouldExportAudio,
             shouldExportTxt = _state.value.shouldExportTxt,
+            shouldExportMd = _state.value.shouldExportMd,
             onProgress = { progress ->
                 _exportingState.update { ExportingFileState.Exporting(progress) }
             }
