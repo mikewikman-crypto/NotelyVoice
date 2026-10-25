@@ -26,8 +26,10 @@ class ExportSelectionInteractorImpl : ExportSelectionInteractor {
         texts: List<String>,
         titles: List<String>,
         audioPath: List<String>,
+        createdDates: List<String>,
         shouldExportAudio: Boolean,
         shouldExportTxt: Boolean,
+        shouldExportMd: Boolean,
         onProgress: (Float) -> Unit,
         onResult: (Result<String>) -> Unit
     ) {
@@ -100,8 +102,10 @@ class ExportSelectionInteractorImpl : ExportSelectionInteractor {
         texts: List<String>,
         titles: List<String>,
         audioPath: List<String>,
+        createdDates: List<String>,
         shouldExportAudio: Boolean,
         shouldExportTxt: Boolean,
+        shouldExportMd: Boolean,
         onProgress: (Float) -> Unit
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
