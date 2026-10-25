@@ -33,21 +33,22 @@ import com.module.notelycompose.resources.batch_export_options
 import com.module.notelycompose.resources.batch_export_select_at_least_one_option
 import com.module.notelycompose.resources.batch_export_select_formats
 import com.module.notelycompose.resources.batch_export_title
-import com.module.notelycompose.resources.batch_export_txt_files
+import com.module.notelycompose.resources.batch_export_md_files
 import com.module.notelycompose.resources.cancel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ExportSelectedItemConfirmationDialog(
     showExportNotesConfirmDialog: Boolean,
-    onExport: (exportAudio: Boolean, exportTxt: Boolean) -> Unit,
+    onExport: (exportAudio: Boolean, exportTxt: Boolean, exportMd: Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     if(showExportNotesConfirmDialog) {
         var exportAudio by remember { mutableStateOf(true) }
         var exportTxt by remember { mutableStateOf(true) }
+        var exportMd by remember { mutableStateOf(false) }
 
-        val hasSelection = exportAudio || exportTxt
+        val hasSelection = exportAudio || exportTxt || exportMd
 
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -84,6 +85,12 @@ fun ExportSelectedItemConfirmationDialog(
                         onCheckedChange = { exportTxt = it }
                     )
 
+                    ExportOption(
+                        text = stringResource(Res.string.batch_export_md_files),
+                        checked = exportMd,
+                        onCheckedChange = { exportMd = it }
+                    )
+
                     if (!hasSelection) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -100,7 +107,7 @@ fun ExportSelectedItemConfirmationDialog(
                 TextButton(
                     onClick = {
                         onDismiss().also {
-                            onExport(exportAudio, exportTxt)
+                            onExport(exportAudio, exportTxt, exportMd)
                         }
                     },
                     enabled = hasSelection,
