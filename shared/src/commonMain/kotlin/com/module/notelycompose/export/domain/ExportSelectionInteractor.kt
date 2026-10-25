@@ -5,8 +5,10 @@ interface ExportSelectionInteractor {
         texts: List<String>,
         titles: List<String>,
         audioPath: List<String>,
+        createdDates: List<String>,
         shouldExportAudio: Boolean,
         shouldExportTxt: Boolean,
+        shouldExportMd: Boolean,
         onProgress: (Float) -> Unit,
         onResult: (Result<String>) -> Unit
     )
