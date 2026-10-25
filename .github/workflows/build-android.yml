@@ -24,13 +24,13 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       
-    - name: Build unsigned release APK
-      run: ./gradlew assembleRelease
+    - name: Build debug APK
+      run: ./gradlew assembleDebug
       
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
-        name: unsigned-release-apk
+        name: notelyvoice-debug-apk
         path: |
-          **/build/outputs/apk/release/*.apk
+          **/build/outputs/apk/debug/*.apk
         retention-days: 30
