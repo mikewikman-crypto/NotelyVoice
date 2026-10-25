@@ -29,8 +29,10 @@ class ExportSelectionInteractorImpl(
         texts: List<String>,
         titles: List<String>,
         audioPath: List<String>,
+        createdDates: List<String>,
         shouldExportAudio: Boolean,
         shouldExportTxt: Boolean,
+        shouldExportMd: Boolean,
         onProgress: (Float) -> Unit,
         onResult: (Result<String>) -> Unit
     ) {
@@ -47,8 +49,10 @@ class ExportSelectionInteractorImpl(
                     texts,
                     titles,
                     audioPath,
+                    createdDates,
                     shouldExportAudio,
                     shouldExportTxt,
+                    shouldExportMd,
                     onProgress
                 )
                 withContext(Dispatchers.Main) {
@@ -63,8 +67,10 @@ class ExportSelectionInteractorImpl(
         texts: List<String>,
         titles: List<String>,
         audioPath: List<String>,
+        createdDates: List<String>,
         shouldExportAudio: Boolean,
         shouldExportTxt: Boolean,
+        shouldExportMd: Boolean,
         onProgress: (Float) -> Unit,
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
@@ -80,6 +86,7 @@ class ExportSelectionInteractorImpl(
 
             // Calculate total items to export
             val totalItems = (if (shouldExportTxt) texts.size else 0) +
+                    (if (shouldExportMd) texts.size else 0) +
                     (if (shouldExportAudio) audioPath.size else 0)
             var completedItems = 0
 
@@ -97,6 +104,33 @@ class ExportSelectionInteractorImpl(
                     textFileNames.add(fileName)
 
                     // Update progress
+                    completedItems++
+                    val progress = completedItems.toFloat() / totalItems.toFloat()
+                    kotlinx.coroutines.MainScope().launch {
+                        onProgress(progress)
+                    }
+                }
+            }
+
+            if(shouldExportMd) {
+                texts.forEachIndexed { index, text ->
+                    val timestampMd = SimpleDateFormat(PATTERN_DATE_FORMAT, Locale.getDefault()).format(Date())
+                    val mdTitle = (titles[index].takeIf { it.isNotBlank() } ?: TEXT_BLANK_DEFAULT).take(20)
+                    val mdFileName = "${mdTitle}-${timestampMd}.md"
+                    val mdFile = exportFolder.createFile("text/markdown", mdFileName)
+                        ?: return@withContext Result.failure(Exception("Failed to create markdown file $index"))
+
+                    val hasAudio = audioPath.getOrNull(index)?.isNotEmpty() == true
+                    val mdContent = buildMarkdown(
+                        titles[index],
+                        createdDates.getOrNull(index).orEmpty(),
+                        hasAudio,
+                        text
+                    )
+                    context.contentResolver.openOutputStream(mdFile.uri)?.use { outputStream ->
+                        outputStream.write(mdContent.toByteArray())
+                    }
+
                     completedItems++
                     val progress = completedItems.toFloat() / totalItems.toFloat()
                     kotlinx.coroutines.MainScope().launch {
@@ -144,6 +178,26 @@ class ExportSelectionInteractorImpl(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    private fun buildMarkdown(
+        title: String,
+        created: String,
+        hasAudio: Boolean,
+        content: String
+    ): String {
+        val safeTitle = title.replace("\\", "\\\\").replace("\"", "\\\"")
+        val sb = StringBuilder()
+        sb.append("---\n")
+        sb.append("title: \"").append(safeTitle).append("\"\n")
+        if (created.isNotBlank()) sb.append("date: \"").append(created).append("\"\n")
+        sb.append("tags: [note")
+        if (hasAudio) sb.append(", voice-note")
+        sb.append("]\n")
+        sb.append("---\n\n")
+        if (title.isNotBlank()) sb.append("# ").append(title).append("\n\n")
+        sb.append(content).append('\n')
+        return sb.toString()
     }
 
     private fun getMimeType(fileName: String): String {
