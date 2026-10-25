@@ -80,7 +80,7 @@ fun ExportSelectedItemConfirmationDialog(
                     )
 
                     ExportOption(
-                        text = stringResource(Res.string.batch_export_txt_files),
+                        text = "Export text as TXT files",
                         checked = exportTxt,
                         onCheckedChange = { exportTxt = it }
                     )
