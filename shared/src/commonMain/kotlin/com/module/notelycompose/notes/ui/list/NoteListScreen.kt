@@ -161,12 +161,13 @@ fun NoteListScreen(
 
     ExportSelectedItemConfirmationDialog(
         showExportNotesConfirmDialog = showExportNotesConfirmDialog,
-        onExport = { exportAudio, exportTxt, exportMd ->
+        onExport = { exportAudio, exportTxt, exportMd, exportDropbox ->
 
             exportViewModel.onUpdateExportOptions(
                 exportAudio,
                 exportTxt,
-                exportMd
+                exportMd,
+                exportDropbox
             )
             navigateToExportNotes()
         },
