@@ -239,7 +239,7 @@ class ExportSelectionInteractorImpl(
         val speaker = if (parts.size >= 2) parts[1] else ""
         val sb = StringBuilder()
         sb.append("---\n")
-        sb.append("type: sermon\n")
+        sb.append("type: note\n")
         sb.append("title: \"").append(esc(title)).append("\"\n")
         if (created.isNotBlank()) {
             sb.append("date: \"").append(esc(created)).append("\"\n")
@@ -248,7 +248,7 @@ class ExportSelectionInteractorImpl(
         if (speaker.isNotBlank()) sb.append("speaker: \"").append(esc(speaker)).append("\"\n")
         sb.append("church: \"\"\n")
         sb.append("series:\nscripture_refs:\nbooks:\ntopics:\nhomework:\nhomework_present: false\n")
-        sb.append("tags: [sermon, notes")
+        sb.append("tags: [notes, voice-export")
         if (speaker.isNotBlank()) sb.append(", \"").append(esc(speaker)).append("\"")
         if (hasAudio) sb.append(", voice-note")
         sb.append("]\n")
