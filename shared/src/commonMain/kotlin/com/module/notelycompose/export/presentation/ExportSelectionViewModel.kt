@@ -99,6 +99,7 @@ class ExportSelectionViewModel(
             shouldExportAudio = _state.value.shouldExportAudio,
             shouldExportTxt = _state.value.shouldExportTxt,
             shouldExportMd = _state.value.shouldExportMd,
+            shouldUploadDropbox = _state.value.shouldUploadDropbox,
             onProgress = { progress ->
                 _exportingState.update { ExportingFileState.Exporting(progress) }
             }
