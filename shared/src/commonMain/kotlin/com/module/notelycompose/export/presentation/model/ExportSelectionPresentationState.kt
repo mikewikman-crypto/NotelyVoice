@@ -7,5 +7,6 @@ data class ExportSelectionPresentationState(
     val shouldExportAudio: Boolean = false,
     val shouldExportTxt: Boolean = false,
     val shouldExportMd: Boolean = false,
+    val shouldUploadDropbox: Boolean = false,
     val selectedNotes: List<NotePresentationModel> = emptyList()
 )
