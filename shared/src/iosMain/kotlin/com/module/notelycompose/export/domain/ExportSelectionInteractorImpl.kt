@@ -30,6 +30,7 @@ class ExportSelectionInteractorImpl : ExportSelectionInteractor {
         shouldExportAudio: Boolean,
         shouldExportTxt: Boolean,
         shouldExportMd: Boolean,
+        shouldUploadDropbox: Boolean,
         onProgress: (Float) -> Unit,
         onResult: (Result<String>) -> Unit
     ) {
@@ -106,6 +107,7 @@ class ExportSelectionInteractorImpl : ExportSelectionInteractor {
         shouldExportAudio: Boolean,
         shouldExportTxt: Boolean,
         shouldExportMd: Boolean,
+        shouldUploadDropbox: Boolean,
         onProgress: (Float) -> Unit
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
