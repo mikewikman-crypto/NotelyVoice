@@ -2,6 +2,7 @@ package com.module.notelycompose.export.domain
 
 import android.content.Context
 import com.module.notelycompose.FolderPickerHandler
+import com.module.notelycompose.dropbox.DropboxUploader
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -33,6 +34,7 @@ class ExportSelectionInteractorImpl(
         shouldExportAudio: Boolean,
         shouldExportTxt: Boolean,
         shouldExportMd: Boolean,
+        shouldUploadDropbox: Boolean,
         onProgress: (Float) -> Unit,
         onResult: (Result<String>) -> Unit
     ) {
@@ -113,6 +115,7 @@ class ExportSelectionInteractorImpl(
         shouldExportAudio: Boolean,
         shouldExportTxt: Boolean,
         shouldExportMd: Boolean,
+        shouldUploadDropbox: Boolean,
         onProgress: (Float) -> Unit,
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
