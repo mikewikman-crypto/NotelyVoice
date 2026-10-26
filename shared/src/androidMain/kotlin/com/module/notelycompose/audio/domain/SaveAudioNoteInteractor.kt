@@ -5,6 +5,7 @@ import audio.recorder.AudioRecorder
 import com.module.notelycompose.notes.domain.GetNoteById
 import com.module.notelycompose.notes.domain.InsertNoteUseCase
 import com.module.notelycompose.notes.domain.UpdateNoteUseCase
+import com.module.notelycompose.onboarding.data.PreferencesRepository
 import com.module.notelycompose.notes.presentation.mapper.TextAlignPresentationMapper
 
 internal interface SaveAudioNoteInteractor {
@@ -18,7 +19,8 @@ internal class SaveAudioNoteInteractorImpl(
     private val getNoteByIdUseCase: GetNoteById,
     private val insertNoteUseCase: InsertNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
-    private val textAlignPresentationMapper: TextAlignPresentationMapper
+    private val textAlignPresentationMapper: TextAlignPresentationMapper,
+    private val preferencesRepository: PreferencesRepository
 ) : SaveAudioNoteInteractor {
 
     override suspend fun save(
@@ -33,7 +35,7 @@ internal class SaveAudioNoteInteractorImpl(
 
     private suspend fun insertNote() {
         insertNoteUseCase.execute(
-            title = "",
+            title = preferencesRepository.buildAutoTitle(),
             content = "",
             starred = false,
             formatting = emptyList(),
