@@ -139,6 +139,7 @@ fun SettingsScreen(
 
             item {
                 ExportSettingSection()
+            AutoNameSection(preferencesRepository)
             }
 
             item {
@@ -876,5 +877,55 @@ fun SettingsModelOptionCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun AutoNameSection(
+    preferencesRepository: PreferencesRepository
+) {
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val prefix by preferencesRepository.getAutoTitlePrefix().collectAsState("")
+    val speaker by preferencesRepository.getAutoSpeaker().collectAsState("")
+    var prefixText by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(prefix) }
+    var speakerText by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(speaker) }
+    androidx.compose.runtime.LaunchedEffect(prefix) { prefixText = prefix }
+    androidx.compose.runtime.LaunchedEffect(speaker) { speakerText = speaker }
+
+    androidx.compose.foundation.layout.Column(
+        modifier = androidx.compose.ui.Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        androidx.compose.material.Text(
+            text = "Auto-name voice notes",
+            style = androidx.compose.material.MaterialTheme.typography.subtitle1
+        )
+        androidx.compose.material.Text(
+            text = "New recordings become: prefix | speaker | date — the speaker also becomes a tag on Markdown export.",
+            style = androidx.compose.material.MaterialTheme.typography.body2
+        )
+        androidx.compose.foundation.layout.Spacer(androidx.compose.ui.Modifier.height(8.dp))
+        androidx.compose.material.OutlinedTextField(
+            value = prefixText,
+            onValueChange = {
+                prefixText = it
+                scope.launch { preferencesRepository.setAutoTitlePrefix(it) }
+            },
+            label = { androidx.compose.material.Text("Title prefix (e.g. Sunday Service)") },
+            modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        androidx.compose.foundation.layout.Spacer(androidx.compose.ui.Modifier.height(8.dp))
+        androidx.compose.material.OutlinedTextField(
+            value = speakerText,
+            onValueChange = {
+                speakerText = it
+                scope.launch { preferencesRepository.setAutoSpeaker(it) }
+            },
+            label = { androidx.compose.material.Text("Speaker (e.g. Micah Parkman)") },
+            modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+            singleLine = true
+        )
     }
 }
