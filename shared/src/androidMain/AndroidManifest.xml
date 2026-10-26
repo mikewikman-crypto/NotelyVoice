@@ -56,6 +56,20 @@
             </intent-filter>
         </service>
 
+        <activity
+            android:name="com.dropbox.core.android.AuthActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="db-${dropboxAppKey}" />
+            </intent-filter>
+        </activity>
+
+        <meta-data android:name="dropbox_app_key" android:value="${dropboxAppKey}" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
