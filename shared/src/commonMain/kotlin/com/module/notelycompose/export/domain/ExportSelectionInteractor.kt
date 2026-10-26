@@ -9,6 +9,7 @@ interface ExportSelectionInteractor {
         shouldExportAudio: Boolean,
         shouldExportTxt: Boolean,
         shouldExportMd: Boolean,
+        shouldUploadDropbox: Boolean,
         onProgress: (Float) -> Unit,
         onResult: (Result<String>) -> Unit
     )
