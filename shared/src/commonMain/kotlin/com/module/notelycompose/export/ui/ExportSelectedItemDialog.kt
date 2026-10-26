@@ -33,22 +33,23 @@ import com.module.notelycompose.resources.batch_export_options
 import com.module.notelycompose.resources.batch_export_select_at_least_one_option
 import com.module.notelycompose.resources.batch_export_select_formats
 import com.module.notelycompose.resources.batch_export_title
-import com.module.notelycompose.resources.batch_export_md_files
+import com.module.notelycompose.resources.batch_export_dropbox
 import com.module.notelycompose.resources.cancel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ExportSelectedItemConfirmationDialog(
     showExportNotesConfirmDialog: Boolean,
-    onExport: (exportAudio: Boolean, exportTxt: Boolean, exportMd: Boolean) -> Unit,
+    onExport: (exportAudio: Boolean, exportTxt: Boolean, exportMd: Boolean, exportDropbox: Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     if(showExportNotesConfirmDialog) {
         var exportAudio by remember { mutableStateOf(true) }
         var exportTxt by remember { mutableStateOf(true) }
         var exportMd by remember { mutableStateOf(false) }
+        var exportDropbox by remember { mutableStateOf(false) }
 
-        val hasSelection = exportAudio || exportTxt || exportMd
+        val hasSelection = exportAudio || exportTxt || exportMd || exportDropbox
 
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -91,6 +92,12 @@ fun ExportSelectedItemConfirmationDialog(
                         onCheckedChange = { exportMd = it }
                     )
 
+                    ExportOption(
+                        text = stringResource(Res.string.batch_export_dropbox),
+                        checked = exportDropbox,
+                        onCheckedChange = { exportDropbox = it }
+                    )
+
                     if (!hasSelection) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -107,7 +114,7 @@ fun ExportSelectedItemConfirmationDialog(
                 TextButton(
                     onClick = {
                         onDismiss().also {
-                            onExport(exportAudio, exportTxt, exportMd)
+                            onExport(exportAudio, exportTxt, exportMd, exportDropbox)
                         }
                     },
                     enabled = hasSelection,
