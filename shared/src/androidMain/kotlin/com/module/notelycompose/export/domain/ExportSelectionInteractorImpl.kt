@@ -55,6 +55,7 @@ class ExportSelectionInteractorImpl(
                     shouldExportAudio,
                     shouldExportTxt,
                     shouldExportMd,
+                    shouldUploadDropbox,
                     onProgress
                 )
                 withContext(Dispatchers.Main) {
