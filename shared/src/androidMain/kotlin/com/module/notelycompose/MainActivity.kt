@@ -14,10 +14,23 @@ import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.module.notelycompose.onboarding.data.PreferencesRepository
 import com.module.notelycompose.platform.Theme
+import com.module.notelycompose.dropbox.ActivityHolder
+import com.module.notelycompose.dropbox.DropboxUploader
 import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContracts
 
 class MainActivity : AppCompatActivity() {
+
+    override fun onResume() {
+        super.onResume()
+        ActivityHolder.activity = this
+        DropboxUploader(this).captureAuthResult()
+    }
+
+    override fun onPause() {
+        ActivityHolder.activity = null
+        super.onPause()
+    }
     private val fileSaverLauncherHolder by inject<FileSaverLauncherHolder>()
     private val folderPickerLauncherHolder by inject<FolderPickerLauncherHolder>()
     override fun onCreate(savedInstanceState: Bundle?) {
