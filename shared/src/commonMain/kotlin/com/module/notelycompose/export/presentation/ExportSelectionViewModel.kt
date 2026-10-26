@@ -49,13 +49,15 @@ class ExportSelectionViewModel(
     fun onUpdateExportOptions(
         shouldExportAudio: Boolean,
         shouldExportTxt: Boolean,
-        shouldExportMd: Boolean
+        shouldExportMd: Boolean,
+        shouldUploadDropbox: Boolean
     ) {
         _state.update { currentState ->
             currentState.copy(
                 shouldExportAudio = shouldExportAudio,
                 shouldExportTxt = shouldExportTxt,
-                shouldExportMd = shouldExportMd
+                shouldExportMd = shouldExportMd,
+                shouldUploadDropbox = shouldUploadDropbox
             )
         }
         onFilterSelectedNotes()
