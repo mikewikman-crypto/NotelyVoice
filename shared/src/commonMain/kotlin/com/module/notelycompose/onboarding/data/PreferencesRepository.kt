@@ -27,6 +27,8 @@ class PreferencesRepository(
         private val KEY_MODEL_DOWNLOAD_ID = longPreferencesKey("model_download_id")
         private val KEY_BODY_TEXT_SIZE = floatPreferencesKey("body_text_size")
         private val KEY_MODEL_SELECTION = intPreferencesKey("model_selection")
+        private val KEY_AUTO_TITLE_PREFIX = stringPreferencesKey("auto_title_prefix")
+        private val KEY_AUTO_SPEAKER = stringPreferencesKey("auto_speaker")
     }
 
     suspend fun hasCompletedOnboarding(): Boolean {
@@ -89,6 +91,33 @@ class PreferencesRepository(
         dataStore.edit { prefs ->
             prefs[KEY_MODEL_SELECTION] = modelSelection
         }
+    }
+
+    suspend fun setAutoTitlePrefix(prefix: String) {
+        dataStore.edit { prefs -> prefs[KEY_AUTO_TITLE_PREFIX] = prefix }
+    }
+
+    suspend fun setAutoSpeaker(speaker: String) {
+        dataStore.edit { prefs -> prefs[KEY_AUTO_SPEAKER] = speaker }
+    }
+
+    fun getAutoTitlePrefix(): Flow<String> = dataStore.data.map { prefs ->
+        prefs[KEY_AUTO_TITLE_PREFIX] ?: ""
+    }
+
+    fun getAutoSpeaker(): Flow<String> = dataStore.data.map { prefs ->
+        prefs[KEY_AUTO_SPEAKER] ?: ""
+    }
+
+    /** "Sunday Service | Micah Parkman | Oct 26, 2026" or "" when unset. */
+    suspend fun buildAutoTitle(): String {
+        val prefs = dataStore.data.first()
+        val prefix = prefs[KEY_AUTO_TITLE_PREFIX].orEmpty().trim()
+        val speaker = prefs[KEY_AUTO_SPEAKER].orEmpty().trim()
+        if (prefix.isBlank() && speaker.isBlank()) return ""
+        val date = java.text.SimpleDateFormat("MMM d, yyyy", java.util.Locale.getDefault())
+            .format(java.util.Date())
+        return listOf(prefix, speaker, date).filter { it.isNotBlank() }.joinToString(" | ")
     }
 }
 
