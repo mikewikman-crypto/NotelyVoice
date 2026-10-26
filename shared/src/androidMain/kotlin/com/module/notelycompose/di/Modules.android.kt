@@ -64,6 +64,7 @@ actual val platformModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
