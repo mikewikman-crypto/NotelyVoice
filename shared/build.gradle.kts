@@ -51,8 +51,8 @@ kotlin {
             implementation(project(":lib"))
 
             // Dropbox upload (v7.x: Java 8-20 compatible)
-            implementation("com.dropbox.core:dropbox-core-sdk:7.1.1")
-            implementation("com.dropbox.core:dropbox-android-sdk:7.1.1")
+            implementation("com.dropbox.core:dropbox-core-sdk:7.0.0")
+            implementation("com.dropbox.core:dropbox-android-sdk:7.0.0")
 
             // splash
             implementation(libs.core.splashscreen)
