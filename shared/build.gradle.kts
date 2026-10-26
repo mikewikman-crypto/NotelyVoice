@@ -50,6 +50,10 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(project(":lib"))
 
+            // Dropbox upload (v7.x: Java 8-20 compatible)
+            implementation("com.dropbox.core:dropbox-core-sdk:7.1.1")
+            implementation("com.dropbox.core:dropbox-android-sdk:7.1.1")
+
             // splash
             implementation(libs.core.splashscreen)
             implementation(libs.androidx.compose.documentfile)
@@ -179,6 +183,7 @@ android {
     // sourceSets["main"].resources.srcDirs("src/commonMain/resources")
     defaultConfig {
         applicationId = "com.module.notelycompose.android"
+        manifestPlaceholders["dropboxAppKey"] = providers.gradleProperty("dropboxAppKey").orElse("")
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 27
