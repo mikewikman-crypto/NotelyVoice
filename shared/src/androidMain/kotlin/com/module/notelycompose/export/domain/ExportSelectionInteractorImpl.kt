@@ -62,6 +62,48 @@ class ExportSelectionInteractorImpl(
         }
     }
 
+    private fun uploadToDropbox(
+        texts: List<String>,
+        titles: List<String>,
+        createdDates: List<String>,
+        audioPath: List<String>,
+        onProgress: (Float) -> Unit,
+        onResult: (Result<String>) -> Unit
+    ) {
+        val uploader = DropboxUploader(context)
+        if (!uploader.isLinked) {
+            com.module.notelycompose.dropbox.ActivityHolder.activity?.let {
+                uploader.requestLink(it)
+            }
+            onResult(Result.failure(Exception(
+                "Dropbox link started - finish signing in, then export again"
+            )))
+            return
+        }
+        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+            try {
+                texts.forEachIndexed { index, text ->
+                    val title = titles[index]
+                    val md = buildMarkdown(
+                        title,
+                        createdDates.getOrNull(index).orEmpty(),
+                        audioPath.getOrNull(index)?.isNotEmpty() == true,
+                        text
+                    )
+                    val name = (title.takeIf { it.isNotBlank() } ?: TEXT_BLANK_DEFAULT)
+                        .take(50).replace(Regex("[^A-Za-z0-9 \\-_.|]"), "").trim()
+                    uploader.uploadText("${DropboxUploader.REMOTE_DIR}/$name.md", md)
+                    onProgress((index + 1).toFloat() / texts.size)
+                }
+                withContext(Dispatchers.Main) {
+                    onResult(Result.success("Uploaded ${texts.size} note(s) to Dropbox"))
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) { onResult(Result.failure(e)) }
+            }
+        }
+    }
+
     private suspend fun performTextExport(
         folderUri: Uri,
         texts: List<String>,
@@ -186,16 +228,29 @@ class ExportSelectionInteractorImpl(
         hasAudio: Boolean,
         content: String
     ): String {
-        val safeTitle = title.replace("\\", "\\\\").replace("\"", "\\\"")
+        fun esc(s: String) = s.replace("\\", "\\\\").replace("\"", "\\\"")
+        // Heuristic: titles like "Sunday Service | Micah Parkman | Sept 20, 2026"
+        // carry the speaker as the middle segment.
+        val parts = title.split("|").map { it.trim() }
+        val speaker = if (parts.size >= 2) parts[1] else ""
         val sb = StringBuilder()
         sb.append("---\n")
-        sb.append("title: \"").append(safeTitle).append("\"\n")
-        if (created.isNotBlank()) sb.append("date: \"").append(created).append("\"\n")
-        sb.append("tags: [note")
+        sb.append("type: sermon\n")
+        sb.append("title: \"").append(esc(title)).append("\"\n")
+        if (created.isNotBlank()) {
+            sb.append("date: \"").append(esc(created)).append("\"\n")
+            sb.append("created_date: \"").append(esc(created)).append("\"\n")
+        }
+        if (speaker.isNotBlank()) sb.append("speaker: \"").append(esc(speaker)).append("\"\n")
+        sb.append("church: \"\"\n")
+        sb.append("series:\nscripture_refs:\nbooks:\ntopics:\nhomework:\nhomework_present: false\n")
+        sb.append("tags: [sermon, notes")
+        if (speaker.isNotBlank()) sb.append(", \"").append(esc(speaker)).append("\"")
         if (hasAudio) sb.append(", voice-note")
         sb.append("]\n")
         sb.append("---\n\n")
-        if (title.isNotBlank()) sb.append("# ").append(title).append("\n\n")
+        sb.append("# ").append(title).append("\n\n")
+        if (speaker.isNotBlank()) sb.append("**Speaker:** [[").append(speaker).append("]]\n\n")
         sb.append(content).append('\n')
         return sb.toString()
     }
