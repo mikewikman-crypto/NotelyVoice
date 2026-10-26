@@ -33,7 +33,6 @@ import com.module.notelycompose.resources.batch_export_options
 import com.module.notelycompose.resources.batch_export_select_at_least_one_option
 import com.module.notelycompose.resources.batch_export_select_formats
 import com.module.notelycompose.resources.batch_export_title
-import com.module.notelycompose.resources.batch_export_dropbox
 import com.module.notelycompose.resources.cancel
 import org.jetbrains.compose.resources.stringResource
 
@@ -87,13 +86,13 @@ fun ExportSelectedItemConfirmationDialog(
                     )
 
                     ExportOption(
-                        text = stringResource(Res.string.batch_export_md_files),
+                        text = "Markdown (.md) files",
                         checked = exportMd,
                         onCheckedChange = { exportMd = it }
                     )
 
                     ExportOption(
-                        text = stringResource(Res.string.batch_export_dropbox),
+                        text = "Upload to Dropbox",
                         checked = exportDropbox,
                         onCheckedChange = { exportDropbox = it }
                     )
