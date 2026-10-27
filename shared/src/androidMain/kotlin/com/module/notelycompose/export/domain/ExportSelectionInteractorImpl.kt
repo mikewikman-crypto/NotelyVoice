@@ -93,8 +93,8 @@ class ExportSelectionInteractorImpl(
                         audioPath.getOrNull(index)?.isNotEmpty() == true,
                         text
                     )
-                    val name = (title.takeIf { it.isNotBlank() } ?: TEXT_BLANK_DEFAULT)
-                        .take(50).replace(Regex("[^A-Za-z0-9 \\-_.|]"), "").trim()
+                    val name = saneTitle(title, 50)
+                        .replace(Regex("[^A-Za-z0-9 \\-_.|]"), "").trim()
                     uploader.uploadText("${DropboxUploader.REMOTE_DIR}/$name.md", md)
                     onProgress((index + 1).toFloat() / texts.size)
                 }
@@ -139,7 +139,7 @@ class ExportSelectionInteractorImpl(
             if(shouldExportTxt) {
                 texts.forEachIndexed { index, text ->
                     val timestampText = SimpleDateFormat(PATTERN_DATE_FORMAT, Locale.getDefault()).format(Date())
-                    val textTitle = (titles[index].takeIf { it.isNotBlank() } ?: TEXT_BLANK_DEFAULT).take(20)
+                    val textTitle = saneTitle(titles[index], 20)
                     val fileName = "${textTitle}-${timestampText}.txt"
                     val textFile = exportFolder.createFile("text/plain", fileName)
                         ?: return@withContext Result.failure(Exception("Failed to create text file $index"))
@@ -161,7 +161,7 @@ class ExportSelectionInteractorImpl(
             if(shouldExportMd) {
                 texts.forEachIndexed { index, text ->
                     val timestampMd = SimpleDateFormat(PATTERN_DATE_FORMAT, Locale.getDefault()).format(Date())
-                    val mdTitle = (titles[index].takeIf { it.isNotBlank() } ?: TEXT_BLANK_DEFAULT).take(20)
+                    val mdTitle = saneTitle(titles[index], 20)
                     val mdFileName = "${mdTitle}-${timestampMd}.md"
                     val mdFile = exportFolder.createFile("text/markdown", mdFileName)
                         ?: return@withContext Result.failure(Exception("Failed to create markdown file $index"))
@@ -194,7 +194,7 @@ class ExportSelectionInteractorImpl(
                             return@withContext Result.failure(Exception("Audio file not found: $path"))
                         }
 
-                        val textTitle = (titles[index].takeIf { it.isNotBlank() } ?: TEXT_BLANK_DEFAULT).take(20)
+                        val textTitle = saneTitle(titles[index], 20)
                         val audioFileName = "${textTitle}-audio-${timestampAudio}.wav"
                         val mimeType = getMimeType(audioFileName)
                         val audioFile = exportFolder.createFile(mimeType, audioFileName)
@@ -233,14 +233,18 @@ class ExportSelectionInteractorImpl(
         content: String
     ): String {
         fun esc(s: String) = s.replace("\\", "\\\\").replace("\"", "\\\"")
+            .replace('\n', ' ').replace('\r', ' ')
+        // A note's "title" can actually contain the whole transcript
+        // (newline-laden). Use its first non-blank line, capped.
+        val t = saneTitle(title, 80)
         // Heuristic: titles like "Sunday Service | Micah Parkman | Sept 20, 2026"
         // carry the speaker as the middle segment.
-        val parts = title.split("|").map { it.trim() }
+        val parts = t.split("|").map { it.trim() }
         val speaker = if (parts.size >= 2) parts[1] else ""
         val sb = StringBuilder()
         sb.append("---\n")
         sb.append("type: note\n")
-        sb.append("title: \"").append(esc(title)).append("\"\n")
+        sb.append("title: \"").append(esc(t)).append("\"\n")
         if (created.isNotBlank()) {
             sb.append("date: \"").append(esc(created)).append("\"\n")
             sb.append("created_date: \"").append(esc(created)).append("\"\n")
@@ -253,11 +257,18 @@ class ExportSelectionInteractorImpl(
         if (hasAudio) sb.append(", voice-note")
         sb.append("]\n")
         sb.append("---\n\n")
-        sb.append("# ").append(title).append("\n\n")
+        sb.append("# ").append(t).append("\n\n")
         if (speaker.isNotBlank()) sb.append("**Speaker:** [[").append(speaker).append("]]\n\n")
         sb.append(content).append('\n')
         return sb.toString()
     }
+
+    private fun saneTitle(raw: String, max: Int = 80): String =
+        raw.lineSequence().firstOrNull { it.isNotBlank() }
+            ?.replace(Regex("\\s+"), " ")
+            ?.trim()
+            ?.take(max)
+            ?: TEXT_BLANK_DEFAULT
 
     private fun getMimeType(fileName: String): String {
         return when (fileName.substringAfterLast('.', "").lowercase()) {
